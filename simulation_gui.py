@@ -113,18 +113,16 @@ class Windows(Gtk.Window):
         if(not test):
             varlist.clear()
             return
-            
-        #check Min and Max values
-       # test = checkMinMax(entry_to_value[Min], entry_to_value[Max])
-       # if(not test):
-       #     print("Min must be strictly less than Max\n")
-       #     return
 
-        #final adjustments to dict of items
-        numBasis=int(varlist[4])
-        numPoints = int(varlist[5])
-    
-        x = np.linspace(0, L ,numPoints)
+        #repoints variables to the proper object
+        hbar = varlist[0]
+        m=varlist[1]
+        L = varlist[2]
+        numBasis= int(varlist[3])
+        numPoints = int(varlist[4])
+        t =varlist[5]
+
+        x = np.linspace(0,L,numPoints)
         
         # parse wavefunction
         gx =self.gx.get_text()
@@ -173,11 +171,11 @@ def checkFloat(mylist0, mylist1):
     Returns False if all values in mylist are not float strings, otherwise
     return True.
     '''
-    for i in range(len(mylist1)):
+    for i in range(len(mylist0)):
         try:
-            mylist1[i] = float(mylist1[i])
+            mylist0[i] = float(mylist0[i])
         except ValueError:
-            print(mylist2[i]+ " is in an invalid form, please revise it")
+            print(mylist1[i]+ " is in an invalid form, please revise it")
             return False
     return True
 
