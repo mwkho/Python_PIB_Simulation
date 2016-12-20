@@ -5,17 +5,17 @@ gi.require_version("Gtk", "3.0")
 from gi.repository import Gtk, GObject
 
 # creating the gui for the simulation
-hbar="HBar"
-mass="Mass"
-L = "Length of box"
-numPoints="Number of quadratures"
-numBasis="Number of basis functions"
-gx= "Wavefunction to simulate\n (in python syntax)"
+h_bar="Hbar"
+mass="Mass,m"
+length = "Length of box, L"
+num_Points="Number of quadratures, numPoints"
+num_Basis="Number of basis functions, numBasis"
+gx= "Wavefunction to simulate, f(x),\n (in python syntax and variables above)"
 time="Time duration"
 
 class Windows(Gtk.Window):
     def __init__(self):
-        Gtk.Window.__init__(self,title="PIB/HO Simulations")
+        Gtk.Window.__init__(self,title="PIB Simulations")
         
         # grid settings
         self.grid = Gtk.Grid()
@@ -25,7 +25,7 @@ class Windows(Gtk.Window):
         
         #creating text entries and labels
         self.hbar = Gtk.Entry()
-        self.hbar_label  = Gtk.Label(hbar)
+        self.hbar_label  = Gtk.Label(h_bar)
         self.hbar_label.set_justify(Gtk.Justification.LEFT)
         
         self.mass = Gtk.Entry()
@@ -33,15 +33,15 @@ class Windows(Gtk.Window):
         self.mass_label.set_justify(Gtk.Justification.LEFT)
         
         self.L = Gtk.Entry()
-        self.L_label  = Gtk.Label(L)
+        self.L_label  = Gtk.Label(length)
         self.L_label.set_justify(Gtk.Justification.LEFT)
         
         self.numPoints = Gtk.Entry()
-        self.numPoints_label  = Gtk.Label(numPoints)
+        self.numPoints_label  = Gtk.Label(num_Points)
         self.numPoints_label.set_justify(Gtk.Justification.LEFT)
         
         self.numBasis = Gtk.Entry()
-        self.numBasis_label=Gtk.Label(numBasis)
+        self.numBasis_label=Gtk.Label(num_Basis)
         
         self.gx = Gtk.Entry()
         self.gx_label=Gtk.Label(gx)
@@ -97,20 +97,21 @@ class Windows(Gtk.Window):
         '''(WIndows, Gtk.Widget) -> None
         Function that simulates upon button click
         '''
-        # create dictionary of entry name to value w/o gx
-        entry_to_value = dict()
-        entry_to_value[hbar] = self.hbar.get_text()
-        entry_to_value[mass] = self.mass.get_text()
-        entry_to_value[L] = self.L.get_text()
-        #entry_to_value[Max] = self.Max.get_text()
-        entry_to_value[numPoints] = self.numPoints.get_text()
-        entry_to_value[numBasis] = self.numBasis.get_text()
-        entry_to_value[time] = self.time.get_text()
+        # create list to store all entered value except the wavefunction
+        hbar = self.hbar.get_text()
+        m = self.mass.get_text()
+        L = self.L.get_text()
+        numPoints = self.numPoints.get_text()
+        numBasis = self.numBasis.get_text()
+        t = self.time.get_text()
+        
+        varlist = [hbar,m,L,numPoints,numPoints,numBasis, t]
+        strlist = [h_bar, mass,length, num_Points, num_basis, time]
         
         # check for valid entries 
-        test = checkAll(entry_to_value)
+        test = checkAll(varlist,strlist)
         if(not test):
-            entry_to_value.clear()
+            varlist.clear()
             return
             
         #check Min and Max values
@@ -120,12 +121,10 @@ class Windows(Gtk.Window):
        #     return
 
         #final adjustments to dict of items
-        entry_to_value[numBasis] =int(entry_to_value[numBasis])
-        entry_to_value[numPoints] = int(entry_to_value[numPoints])
+        numBasis=int(varlist[4])
+        numPoints = int(varlist[5])
     
-        x = np.linspace(0,entry_to_value[L],entry_to_value[numPoints])
-        #x = np.linspace(0,10,1000)
-        #gx = eval("x**2")
+        x = np.linspace(0, L ,numPoints)
         
         # parse wavefunction
         gx =self.gx.get_text()
@@ -137,20 +136,15 @@ class Windows(Gtk.Window):
                 raise ValueError
         except ValueError:
             print("please do not put in numbers as the wavefunction")
-            entry_to_value.clear()
             return
         except Exception:
             print("invalid wavefunction, please type it with proper syntax.\n"+ 
             "NOTE: numpy has been imported as np")
-            entry_to_value.clear()
             return        
 
         #simulate when button pressed
         try:
-            ani = self.simulator.simulate(entry_to_value[hbar],entry_to_value[mass],
-                                      entry_to_value[L],entry_to_value[numPoints],
-                                      x, entry_to_value[numBasis], wf,
-                                      entry_to_value[time])
+            ani = self.simulator.simulate(hbar,m,L,numPoints,x,numBasis, wf,t)
         except AttributeError:
             print("check your parameters again")
             return
@@ -160,48 +154,49 @@ class Windows(Gtk.Window):
         ##TODO##           
         return
 
-def checkAll(mydict):
-    truth = checkFloat(mydict)
+def checkAll(lst1, lst2):
+    '''(list,list) -> bool
+    '''
+    truth = checkFloat(mylist)
     if(not truth):
         return truth
-    truth = checkPositive(mydict)
+    truth = checkPositive(mylist)
     if (not truth):
         return truth
-    truth = checkMorePoints(mydict)
+    truth = checkMorePoints(mylist)
     if(not truth):
         return truth
     return True
 
-def checkFloat(mydict):
-    '''(dict) -> bool
-    Returns False if all values in mydict are not float strings, otherwise
+def checkFloat(mylist0, mylist1):
+    '''(list,list) -> bool
+    Returns False if all values in mylist are not float strings, otherwise
     return True.
     '''
-    for key in mydict.keys():
+    for i in range(len(mylist1)+1):
         try:
-            mydict[key] = float(mydict[key])
+            mylist1[i] = float(mylist1[i])
         except ValueError:
-            print(key+ " is in an invalid form, please revise it")
+            print(mylist2[i]+ " is in an invalid form, please revise it")
             return False
     return True
 
-def checkPositive(mydict):
-    '''(dict)->bool
-    Check if the values for the keys, 
-    "hbar, mass, numPoints, numBasis, time, L"
-    are postive. Returns True if they are, otherwise return False.
+def checkPositive(mylist0, mylist1):
+    '''(list,list)->bool
+    Check if the values in mylist0 are postive.
+    Returns True if they are, otherwise return False.
     '''
-    for key in [hbar, mass, numPoints, numBasis, time, L]:
-        if (mydict[key] < 0):
-            print(key+ " must be nonegative")
+    for i in range(len(mylist0)):
+        if (mylist0[i] < 0):
+            print(mylist1[i]+ " must be nonegative")
             return False
     return True
 
-def checkMorePoints(mydict):
-    '''(dict)-bool
-    Returns True if mydict[numPoints] is >=2, returns False otherwise.
+def checkMorePoints(list0):
+    '''(list)-bool
+    Returns True if  numPoints is >=2, returns False otherwise.
     '''
-    if (mydict[numPoints] < 2):
+    if (list0[4] < 2):
         print("Number of quadratures must be >=2")
         return False
     return True
