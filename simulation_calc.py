@@ -1,10 +1,11 @@
+from PyQt4 import QtCore, QtGui
 import matplotlib
-matplotlib.use("Gtk3agg")
+matplotlib.rcParams['backend'] = "qt4agg"
+matplotlib.rcParams['backend.qt4'] = "PySide"
 import matplotlib.backends
 import matplotlib.pyplot as plt
 import matplotlib.animation as animation
 import numpy as np
-import math
 
 class OneD_simulate:
     def __init__(self):
@@ -28,7 +29,7 @@ class OneD_simulate:
     
         # basis functions   
         # np.outer(a,b) does the  nx1 and 1xm matrix multiplication
-        psix = math.sqrt(2/L)* np.sin((np.pi/L)*np.outer(num_vec,x))
+        psix = np.sqrt(2/L)* np.sin((np.pi/L)*np.outer(num_vec,x))
     
         #normalizing wf
         w = create_weights(numPoints,dx)
@@ -51,13 +52,13 @@ class OneD_simulate:
             return self.__line,
         
         def animate(i):
-            ht_real = cn *np.cos((En_vec/hbar)*i)
+            ht_real = cn *np.cos((En_vec/hbar)*(i/20))
             wf_real  = ht_real.dot(psix)
             self.__line.set_data(x, wf_real)
             return self.__line,
 
         self.ani= animation.FuncAnimation(self.__fig, animate, init_func=init,frames=200, interval=20, blit=True,repeat=False)    
-        plt.show() 
+        plt.show()
         return self.ani
 
 def normalize(gx, weights):
