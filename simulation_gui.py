@@ -106,7 +106,7 @@ class Windows(Gtk.Window):
         t = self.time.get_text()
         
         varlist = [hbar,m,L,numPoints,numPoints,numBasis, t]
-        strlist = [h_bar, mass,length, num_Points, num_basis, time]
+        strlist = [h_bar, mass,length, num_Points, num_Basis, time]
         
         # check for valid entries 
         test = checkAll(varlist,strlist)
@@ -157,13 +157,13 @@ class Windows(Gtk.Window):
 def checkAll(lst1, lst2):
     '''(list,list) -> bool
     '''
-    truth = checkFloat(mylist)
+    truth = checkFloat(lst1,lst2)
     if(not truth):
         return truth
-    truth = checkPositive(mylist)
+    truth = checkPositive(lst1,lst2)
     if (not truth):
         return truth
-    truth = checkMorePoints(mylist)
+    truth = checkMorePoints(lst1)
     if(not truth):
         return truth
     return True
@@ -173,7 +173,7 @@ def checkFloat(mylist0, mylist1):
     Returns False if all values in mylist are not float strings, otherwise
     return True.
     '''
-    for i in range(len(mylist1)+1):
+    for i in range(len(mylist1)):
         try:
             mylist1[i] = float(mylist1[i])
         except ValueError:
